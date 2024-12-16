@@ -1,0 +1,20 @@
+#Command to get secret value from keyvault
+
+az login --identify --allow-no-subscriptions -o tsv --only-show-errors
+az keyvault secret show --vault-name <Key vault name> --name <secret name> | /usr/local/bin/jq - r .value
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+#To set sticky bit on all world weritable directories(Linux Commands)
+
+sudo df --local -P | awk {'if (NR!=1) print $6'} | sudo xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \) 2>/dev/null | sudo  xargs chmod a+t 2>/dev/null
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+#To view the certificate - 
+
+keytool -v -list -keystore dashboard-poc.test.att.com.jks  (where the cerificate is in jks format)
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
