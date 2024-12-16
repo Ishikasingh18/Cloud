@@ -1,0 +1,235 @@
+Steps for Oracle Client 19.x Silent Installation on Linux 8.10:
+
+prerequisite-
+
+if oracle user os not then we have to create it - 
+
+groupadd oinstall
+groupadd dba
+useradd -g oinstall -G dba oracle
+passwd oracle
+
+1. Download the Oracle Client Software
+
+Download the Oracle Client 19.x software for Linux from the Oracle website.
+You can choose either the Basic Client or Administrator Client based on your needs.
+
+2. Prepare Your Environment
+
+Ensure the prerequisites for the Oracle Client are met, such as having the necessary libraries and packages installed. Some common prerequisites are:
+
+sudo yum install -y libaio-devel
+
+sudo yum install -y compat-libcap1  ---- not found
+sudo yum install -y compat*
+sudo yum install -y glibc 
+sudo yum install -y libXrender  
+sudo yum install -y gcc 
+
+3. Create Oracle Installation Directories
+Create the directory where you want to install the Oracle client and set the correct permissions.
+
+sudo mkdir -p /opt/oracle/product/19c/client
+sudo chown -R oracle:oinstall /opt/oracle
+
+4. Prepare the Oracle Installation Response File
+The Oracle Client installation uses a response file for silent installations. You can use the provided sample response file (client_install.rsp) or create your own. Here's an example of a minimal 
+
+create client_install.rsp file with oracle user only
+cat /opt/oracle/client_install.rsp
+
+# Sample Oracle 19c Client Installation Response File
+
+oracle.install.responseFileVersion=/oracle/install/rspfmt_clientinstall_response_schema_v19_0_0
+UNIX_GROUP_NAME=oinstall
+INVENTORY_LOCATION=/opt/oracle/oraInventory
+ORACLE_HOME=/opt/oracle/product/19c/client
+ORACLE_BASE=/opt/oracle
+oracle.install.client.installType=Administrator
+#DECLINE_SECURITY_UPDATES=true
+
+5. Extract the Oracle Client Installation Files
+Assuming you've downloaded the Oracle Client zip file, extract it:
+
+from root user , 
+extract the zip file at path /opt/oracle
+=================================================
+In case of NPROD account :
+
+aws s3 cp s3://non-dox-db-dump/Oracle/LINUX.X64_193000_client_home.zip .
+unzip -o LINUX.X64_193000_client_home.zip -d /opt/oracle/product/19c/client
+
+======================================================
+Incase of PROD account :
+
+copy the access key of  vzlz-u2c-nondox-test - from AWS access portal where accounts are visible
+
+Now open linux machine in prod , go to the path /opt/oracle/product/19c/client
+Now export all the keys:
+Eg (vzlz-u2c-nondox-test ):
+
+
+export AWS_ACCESS_KEY_ID= #########
+export AWS_SECRET_ACCESS_KEY= #########
+export AWS_SESSION_TOKEN= #########
+
+Now run the command :
+
+aws s3 cp s3://non-dox-db-dump/Oracle/LINUX.X64_193000_client_home.zip .
+unzip -o LINUX.X64_193000_client_home.zip -d /opt/oracle/product/19c/client
+
+6. Run the Oracle Client Silent Installation
+Once the response file is configured, run the silent installer using runInstaller.
+Make sure you're executing it as the oracle user:
+
+export ORACLE_HOME=/opt/oracle/product/19c/client
+export PATH=$ORACLE_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib
+#export CV_ASSUME_DISTID=OEL7.8
+
+export CV_ASSUME_DISTID=OEL8.1
+
+
+==================================================
+
+cd /opt/oracle/product/19c/client
+
+
+./runInstaller -silent -responseFile /opt/oracle/client_install.rsp -ignorePrereq
+
+Just for ERROR :
+
+
+
+check for the permission  ls -lrt /opt/oracle/product/19c/client , it must be oracle oinstall. If not ( RUN this command from root : chown -R oracle:oinstall /opt/oracle ,
+
+RUN below commands from oracle user : 
+
+
+	• curl -o oracle-database-preinstall-19c-1.0-2.el8.x86_64.rpm https://yum.oracle.com/repo/OracleLinux/OL8/appstream/x86_64/getPackage/oracle-database-preinstall-19c-1.0-2.el8.x86_64.rpm
+
+	• dnf -y localinstall oracle-database-preinstall-19c-1.0-2.el8.x86_64.rpm
+
+
+===============================================================
+
+export CV_ASSUME_DISTID=OEL8.1
+
+-silent: Runs the installation without user interaction.
+-responseFile: Specifies the path to the response file.
+-ignorePrereq: Skips prerequisite checks (only use if you're certain all prerequisites are met).
+
+7. Monitor the Installation
+During installation, you can monitor the installation log to ensure the process is running smoothly:
+
+tail -f /opt/oracle/oraInventory/logs/installActions*.log
+
+8. Run Root Scripts
+Once the installation completes, you will be prompted to run some root scripts. Run these scripts as the root user:
+
+sudo /opt/oracle/oraInventory/orainstRoot.sh
+sudo /opt/oracle/product/19c/client/root.sh
+
+9. Verify the Installation
+Once the installation is complete, you can verify it by checking the Oracle Client version:
+
+/opt/oracle/product/19c/client/bin/sqlplus -v
+This should return the version of the installed Oracle Client, confirming that the silent installation was successful.
+
+10. Set Environment Variables (Optional)
+Set the Oracle environment variables, such as ORACLE_HOME, PATH, and LD_LIBRARY_PATH, if required:
+
+export ORACLE_HOME=/opt/oracle/product/19c/client
+export PATH=$ORACLE_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
+
+
+
+# Sample Oracle 19c Client Installation Response File - client_install.rsp
+
+oracle.install.responseFileVersion=/oracle/install/rspfmt_clientinstall_response_schema_v19_0_0
+UNIX_GROUP_NAME=oinstall
+INVENTORY_LOCATION=/opt/oracle/oraInventory
+ORACLE_HOME=/opt/oracle/product/19c/client
+ORACLE_BASE=/opt/oracle
+oracle.install.client.installType=Administrator
+
+Now first check the Inventory location is present or not , if not then create - 
+mkdir -p /opt/oracle/oraInventory
+
+Now check for ORACLE_HOME once - 
+It's present in my case 
+
+Now -
+
+cd /opt/oracle/product/19c/client
+
+
+./runInstaller -silent -responseFile /opt/oracle/client_install.rsp -ignorePrereq
+
+Run successfully , check for tnsping & sqlldr
+
+
+==============================================================================
+
+
+Set the environment variable in .bash_profile , so that it won't get removed after session expired-
+vi .bash_profile 
+
+export ORACLE_HOME=/opt/oracle/product/19c/client
+export PATH=$ORACLE_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
+
+save it & run -
+echo $ORACLE_HOME
+
+==============================================================================
+
+
+switch to root user - 
+
+ls -lart
+check for shell first 
+echo $SHELL
+if kshell then .kshrc is taken , if bash then .bash_profile move to next steps -
+
+
+Note : for .bash_profile - edit the file by adding below commands - 
+
+export ORACLE_HOME=/opt/oracle/product/19c/client
+export PATH=$ORACLE_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
+
+now copy the file from root to oracle -
+
+Cp .bash_profile /opt/oracle
+Grant permission for the same - 
+Chown oracle:oinstall .bash_profile
+
+Now login to oracle user & check for oracle_home path & sqlplus version
+Echo $ORACLE_HOME
+Sqlplus -v
+
+Tnsping 
+Which sqlldr
+
+==============================================================================
+sudo su - oracle
+create this file if not present (if your machine has kshell, first check which shell you're using)
+
+# .kshrc
+ 
+# Source global definitions
+if [ -f /etc/kshrc ]; then
+        . /etc/kshrc
+fi
+ 
+# use emacs editing mode by default
+set -o emacs
+ 
+# User specific aliases and functions
+ 
+export ORACLE_HOME=/opt/oracle/product/19c/client
+export PATH=$ORACLE_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
+
