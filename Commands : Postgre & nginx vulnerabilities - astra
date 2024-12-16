@@ -1,0 +1,31 @@
+ yum list nginx*
+ yum list nginx-*
+ yum remove -y nginx-*
+ yum list nginx-*
+ yum list nginx*
+ yum remove -y nginx.x86_64
+
+==============================
+
+ ps -ef | grep pg
+ pgql -v
+ psql -v
+ psql -V
+ dnf list postgre*
+ yum list postgre*
+ dnf list postgresql
+ dnf remove postgresql.x86_64 -y
+ dnf list postgre*
+ dnf remove postgresql-*
+ dnf list postgre*
+ dnf module list postgresql
+ dnf module enable postgresql:15
+ sudo dnf module enable postgresql:15
+ sudo dnf module reset postgresql
+ sudo dnf module enable postgresql:15
+ sudo dnf install postgresql-server -y
+ sudo postgresql-setup --initdb
+ pgsql -V
+ psql -V
+yum update -y
+
