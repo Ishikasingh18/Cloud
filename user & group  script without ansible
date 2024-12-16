@@ -1,0 +1,67 @@
+create_users.sh
+
+
+#!/bin/bash
+
+# Function to create a group
+create_group() {
+  local groupname=$1
+  local gid=$2
+
+  # Create group if it doesn't exist
+  if ! getent group "$groupname" > /dev/null; then
+    groupadd -g "$gid" "$groupname"
+  fi
+}
+
+# Function to create a user
+create_user() {
+  local username=$1
+  local description=$2
+  local group=$3
+  local uid=$4
+  local shell=$5
+  local home_dir=$6
+  local enable_crontab=$7
+
+  # Create home directory if it doesn't exist
+  if [ ! -d "$home_dir" ]; then
+    mkdir -p "$home_dir"
+    chmod 755 "$home_dir"
+  fi
+
+  # Create user with specified details
+  useradd -m -d "$home_dir" -s "$shell" -c "$description" -u "$uid" -g "$group" "$username"
+
+  # Enable or disable crontab
+  if [ "$enable_crontab" == "Yes" ]; then
+    if ! getent group cron > /dev/null; then
+      groupadd cron
+    fi
+    usermod -aG cron "$username"
+  else
+    crontab -r -u "$username"
+  fi
+}
+
+# Create groups
+
+create_group "users" "10602"
+create_group "dba" "66711"
+
+
+
+# User details
+create_user "users" "operation user" "opcgrp" "10602" "/bin/ksh" "/home/opc_adm" "No"
+create_user "dba" "monitoring user" "adba" "66711" "/bin/ksh" "/opt/SP/dba/amddba" "Yes"
+
+
+echo "Users and groups have been created successfully."
+
+----------------------------------------------------------------------------------------------------
+
+Mentioned user and group are created via script under root user
+
+vi /usr/local/sbin/create_users.sh
+
+chmod +x /usr/local/sbin/create_users.sh
