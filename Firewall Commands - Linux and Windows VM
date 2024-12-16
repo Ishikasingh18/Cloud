@@ -6,6 +6,19 @@ systemctl disable firewalld
 
 Note : userdata has been updated with firewalld via terraform 
 
+-------------------------------------------------------------------------
+
+script is added in user_data resource in terraform file to disable firewall.
+
+ user_data          = <<-EOF
+                        #!/bin/bash
+                        echo "Running user data script"
+                        sudo systemctl stop firewalld
+                        sudo systemctl disable firewalld
+                        EOF
+
+======================================================================================================================================================
+
 #Windows Machine
 
 1. Check the status of Windows Defender Firewall:
@@ -13,4 +26,19 @@ netsh advfirewall show allprofiles
 
 2. Disable Windows Defender Firewall:
 netsh advfirewall setallprofiles state off
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+script is added in user_data resource in terraform file to disable firewall.
+
+
+<<-EOF          
+<powershell>
+
+# Disable the firewall
+  netsh advfirewall set allprofiles state off
+  Set-Service -Name "MpsSvc" -StartupType Disabled
+  Stop-Service -Name "MpsSvc"
+</powershell>           
+    EOF
 
