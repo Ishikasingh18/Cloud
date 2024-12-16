@@ -1,0 +1,95 @@
+Ansible Image Upgrade and Deployment - Internal 
+
+Agenda:
+
+GI Upgrade :
+
+1. Upgrade Ansible GI
+2. Deployment 
+
+===================
+Ansible repo :
+
+Repo    : 8099-Ansible-Image-Builder-rs603m
+Pipline : 8099-Ansible-Image-Builder-rs603m 
+
+===================
+Current status :
+
+Build Custom Image - 
+
+Shared Gallery Image Version ID : '/subscriptions/b4ded5b3-4d97-4e9b-9996-8e749fe76550/resourceGroups
+                                   /8099-eastus2-nprd-devops-rg/providers/Microsoft.Compute/
+                                   galleries/8099_eastus2_nprd_devops_sig/images
+                                   /lex/versions/2.0.2'
+
+NPRD  b4ded5b3-4d97-4e9b-9996-8e749fe76550 
+      8099-eastus2-nprd-devops-rg
+      8099_eastus2_nprd_devops_sig
+
+OSType: Linux
+
+ManagedImageResourceGroupName: 8099-eastus2-nprd-devops-rg
+ManagedImageName: app-lex-2.0.2
+ManagedImageId: /subscriptions/b4ded5b3-4d97-4e9b-9996-8e749fe76550/resourceGroups/ 
+                8099-eastus2-nprd-devops-rg/providers/Microsoft.Compute/images/app-lex-2.0.2
+
+ManagedImageLocation: eastus2
+ManagedImageSharedImageGalleryId: /subscriptions/b4ded5b3-4d97-4e9b-9996-8e749fe76550/resourceGroups/8099-eastus2-nprd-devops-rg/providers/Microsoft.Compute/galleries/8099_eastus2_nprd_devops_sig/images/lex/versions/2.0.2
+
+Lex 
+2.0.2  Eastus2  PROD NPRD POC 
+       Westus2  DR 
+
+
+Action :
+
+https://dev.azure.com/ACC-Azure-04/8099-LEX/_git/8099-Ansible-Image-Builder-rs603m?path=/Application/Packer.json
+
+        "replication_regions": [
+          "eastus2", "westus2"
+        ]
+
+2.0.3 ( PROD NPRD POC DR )
+
+
+
+RHEL Version  
+
+8.6 8.7 8.9 
+8.10
+
+
+===============================================
+ATT Shared Image 2.2734.747509495 RHEL 8.10  Base Image 
+DICA Image       19.858484985050  RHEL 8.10 + ORACLE CLIENT 
+
+Ansible Image    2.0.3  ---> DICA Image       Latest  RHEL 8.10 + ORACLE CLIENT
+
+LEX -- ORACLE CLIENT  -- APP VM  Installed 
+
+=========================================
+
+Ansible Image with DICA Image  = RHEL 8.10 + ORACLE CLIENT + Custom software installation Mevan , JAVA 17 , TomCAT  
+
+Ansible Image with ATT Shared Image = RHEL 8.10 + Custom software installation Mevan , JAVA 17 , TomCAT  
+
+========================================================
+Deployment :
+
+VM   Plan + Apply             2.0.2 --> 2.0.3 
+Managed Disk  Plan + Apply 
+VM Extension  Plan + Apply 
+
+========================================================
+
+12 July --> Latest --> DICA --> 19.XXXX  ---> /var/lib/att/publiccloud/Images_version V2.4656.20246655  (ATT Shared Image)
+
+ATT Shared 10 July V2.4656.20246655 Latest
+DICA Image 11 July 19.XXXXXXX1   Latest 
+Ansible    12 July 2.0.3 
+
+12 July --> Latest --> DICA --> 19.XXXX1  ---> /var/lib/att/publiccloud/Images_version V2.4656.20246656  (ATT Shared Image)
+
+ATT Shared 13 July V2.4656.20246656 Latest     7/3/2024, 2:45:18 AM
+DICA Image 14 July 19.XXXXXXX2   Latest        7/3/2024, 7:18:03 AM
