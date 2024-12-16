@@ -1,0 +1,8 @@
+keyVaultName="your-key-vault-name"
+newExpiryDate="2025-06-09T23:59:59Z"
+secrets=$(az keyvault secret list --vault-name $keyVaultName --query "[].id" -o tsv)
+for secret in $secrets
+do
+    name=$(basename $secret)
+    az keyvault secret set-attributes --vault-name $keyVaultName --name $name --expires $newExpiryDate
+done
