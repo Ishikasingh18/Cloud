@@ -1,0 +1,16 @@
+Manually in each instance , Run below commands:
+
+
+sudo fallocate -l 10G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+sudo swapon --show
+
+Make the Swap File Permanent: Add the following line to your /etc/fstab file
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+/etc/fstab
+free  -h
+
+
