@@ -1,0 +1,10 @@
+# Add Inbound Rule to Database Security Group to Allow Traffic from Application Security Group
+  
+ resource "aws_security_group_rule" "allow_app_to_db" {
+  type                     = "ingress"
+  from_port                = 3306  # Replace with your DB port (e.g., 3306 for MySQL)
+  to_port                  = 3306  # Replace with your DB port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.db_security_group.id
+  source_security_group_id = aws_security_group.app_security_group.id
+}
