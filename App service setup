@@ -1,0 +1,124 @@
+App service setup for SAM app :
+
+
+For SAM, taking reference of RMC app 
+
+
+
+
+
+
+
+
+Taking the template from RMC C  & merge into SAM
+
+
+
+No changes required till row 1 to 26, same template & config for all apps
+
+
+
+
+
+
+for row 32 -34 --> 
+Docker_registry_server_url
+subscription --> resource group
+ACR name is same for all environment
+
+no need to give hardcore value as it is define under pipeline --> nprd.yaml
+
+
+
+
+
+For now, docker image is latest
+
+no need to give hardcore value as it is define under pipeline --> nprd.yaml
+
+from line 37--80 , no changes
+it runs on container image
+app service means app code deploy kroge like docker image build kia (we can't deploy docker image) --> so we pushing this image through ACR --> app service reads the image and pick the latest image from ACR
+
+In SAM app:
+App service --> app code docker image --> ACR --> app service -- app
+
+In OBF app:
+App service --> App code Tomcat Java 17 --> app service -- app
+
+
+Now cross check the subnet delegation as given below & run the pipeline with stages: app service nprd apply & run --
+
+
+
+
+
+
+
+
+
+Now execute the pipeline :
+
+
+
+
+
+
+Also select application insight NPRD run & apply before running pipeline
+
+We can't enable application insight manually as given below 
+
+
+
+
+Under networking --->
+
+
+
+ enable all this & apply 
+
+
+
+
+
+Now identity - true
+
+
+
+
+Add the resource group in identity :
+
+
+
+
+Go to ACR --> Identity --> status : on for all
+
+
+
+
+Add the access control for each of the 3 for ACR
+
+
+
+Now it will reflect like this ;
+
+
+
+This settings which we set above are seen in app setting as given below :
+
+
+
+
+Subscription --> nprd rg --> Under config --> FTP state : all allowed and save . 
+Remember : watever the changes done in config, the app service restart automatically at each time
+
+
+
+
+
+==============================================================================================================
+
+
+
+
+
