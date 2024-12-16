@@ -1,0 +1,343 @@
+CD Secure + Installation steps 
+ 
+Text
+
+==========================================================
+MWOG APP : CD secure + Installation:
+===========================================================
+Prerequesites:
+
+1. Need CD cert.
+
+For Connect Direct + :  Please provide the CD certificate in .pem format and password. 
+Please user “KeyFactor Template SHA-1” to download the cert.
+
+FQDN:  : mwog-poc.az.3pc.att.com
+
+========================================================
+
+Login as root user
+
+mkdir -p /opt/app/ndm
+sudo groupadd ndm
+sudo useradd ndm -g ndm
+
+Validate:
+=========
+
+[root@mwog-eastus2-poc-app-vm-01 app]# id ndm
+uid=1004(ndm) gid=6670(ndm) groups=6670(ndm)
+
+
+
+sudo usermod -d /opt/app/ndm -m ndm 
+
+Validate :
+=========
+
+[root@mwog-eastus2-poc-app-vm-01 ~]# sudo su - ndm
+Last login: Mon Feb 12 12:50:39 UTC 2024 on pts/0
+[ndm@mwog-eastus2-poc-app-vm-01 ~]$ pwd
+/opt/app/ndm
+
+
+mkdir -p /opt/app/ndm/localbin
+vi /opt/app/ndm/keycert
+vi /opt/app/ndm/options.txt
+
+cdai_trace=y
+cdai_installCmd=install
+cdai_cpioFile=cdunix610
+cdai_installDir=/opt/app/ndm/cdunix
+cdai_spConfig=spcust.sh
+cdai_localNodeName=mwogpoc01            -- Change the Local Node 
+cdai_acquireHostnameOrIP=ip4
+cdai_serverPort=1364
+cdai_clientPort=1363
+cdai_localCertFile=keycert.pem
+cdai_adminUserid=ndm
+cdai_keystorePassword=MWOGCert@2023     -- Change the cert password 
+
+Take the back  of options.txt file 
+===========================================
+cd /opt/app/ndm
+cp options.txt options.txt-orig
+
+
+vi /opt/app/ndm/netmap.cfg
+vi /opt/app/ndm/userfile.cfg
+vi /opt/app/ndm/spcust.sh
+
+[root@mwog-eastus2-poc-app-vm-01 ndm]# ls -lrt /opt/app/ndm/netmap.cfg
+-rw-r--r--. 1 root root 1379 Feb 12 13:12 /opt/app/ndm/netmap.cfg
+[root@mwog-eastus2-poc-app-vm-01 ndm]# ls -lrt /opt/app/ndm/userfile.cfg
+-rw-r--r--. 1 root root 603 Feb 12 13:13 /opt/app/ndm/userfile.cfg
+[root@mwog-eastus2-poc-app-vm-01 ndm]# ls -lrt /opt/app/ndm/spcust.sh
+-rw-r--r--. 1 root root 1111 Feb 12 13:13 /opt/app/ndm/spcust.sh
+
+changes for : /opt/app/ndm/netmap.cfg
+=================================================
+[root@mwog-eastus2-poc-app-vm-01 ndm]# grep 10.3.2.5 /opt/app/ndm/netmap.cfg
+ :tcp.api=10.3.2.5;1363:\
+ :comm.info=10.3.2.5;1364:\
+
+[root@mwog-eastus2-poc-app-vm-01 ndm]# grep mwog /opt/app/ndm/netmap.cfg
+mwogpoc01:\
+
+changes for : /opt/app/ndm/userfile.cfg
+
+[root@mwog-eastus2-poc-app-vm-01 ndm]# grep mwogadmin /opt/app/ndm/userfile.cfg
+mwogadmin:\
+[root@mwog-e
+
+changes for /opt/app/ndm/spcust.sh
+
+[root@mwog-eastus2-poc-app-vm-01 ndm]# grep -E 'path|Passphrase|Label|KeyCertLabel' /opt/app/ndm/spcust.sh
+        path=/opt/app/ndm/cdunix/ndm/cfg/mwogpoc01/netmap.cfg
+        Passphrase=MWOGCert@2023
+        Label=mwog-poc.az.3pc.att.com
+        KeyCertLabel=mwog-poc.az.3pc.att.com
+    ;    KeyCertLabel=mwog-poc.az.3pc.att.com
+[root@mwog-eastus2-poc-app-vm-01 ndm]#
+
+cd /opt/app/ndm/localbin 
+
+vi cdunix_generic
+
+mkdir -p /opt/app/ndm/ndm_logs
+
+Validate : 
+
+[root@mwog-eastus2-poc-app-vm-01 localbin]# grep /opt/app/ndm/ndm_logs cdunix_generic
+LOGFILE=/opt/app/ndm/ndm_logs/GENERIC_LOG_${UNIQUEID}_${snddt}_${pidno}
+
+
+vi /etc/environment  ---see the contents below:
+
+	export LD_LIBRARY_PATH=/opt/app/ndm/cdunix/ndm/lib:$LD_LIBRARY_PATH
+	NDMAPICFG=/opt/app/ndm/cdunix/ndm/cfg/cliapi/ndmapi.cfg
+
+
+chown -R ndm:ndm /opt/app/ndm
+chmod -R 755 /opt/app/ndm
+
+
+================================
+Required software
+===============================
+
+cp /mnt/mwogfiles-poc-app-01/IBM_CD_V6.1_UNIX_RedHat.tar.gz /opt/app/ndm/.
+cd /opt/app/ndm/
+tar -xvf IBM_CD_V6.1_UNIX_RedHat.tar.gz
+mv cdunix cdunix610
+
+yum update libstdc++ -y
+yum install libstdc++.i686
+
+chown -R ndm:ndm /opt/app/ndm
+chmod -R 755 /opt/app/ndm
+
+
+[root@mwog-eastus2-poc-app-vm-01 ndm]# ll /lib64/libtirpc.so.3
+lrwxrwxrwx. 1 root root 17 Aug  3  2022 /lib64/libtirpc.so.3 -> libtirpc.so.3.0.0
+
+[root@mwog-eastus2-poc-app-vm-01 ndm]# ll /lib64/libtirpc.so.1
+ls: cannot access '/lib64/libtirpc.so.1': No such file or directory
+[root@mwog-eastus2-poc-app-vm-01 ndm]#
+
+
+ln -s /lib64/libtirpc.so.3 /lib64/libtirpc.so.1
+
+[root@mwog-eastus2-poc-app-vm-01 ndm]# ll /lib64/libtirpc.so.1
+lrwxrwxrwx. 1 root root 20 Feb 12 13:52 /lib64/libtirpc.so.1 -> /lib64/libtirpc.so.3
+
+
+chown -R ndm:ndm /opt/app/ndm
+chmod -R 755 /opt/app/ndm
+
+
+[root@mwog-eastus2-poc-app-vm-01 ndm]# ll
+total 1473516
+-rwxr-xr-x. 1 ndm ndm    105691 Apr 30  2020 cdinstall
+-rwxr-xr-x. 1 ndm ndm     83948 Apr 30  2020 cdinstall_a
+-rwxr-xr-x. 1 ndm ndm 836771840 Apr 30  2020 cdunix610
+-rwxr-xr-x. 1 ndm ndm 671883287 Feb 12 13:43 IBM_CD_V6.1_UNIX_RedHat.tar.gz
+-rwxr-xr-x. 1 ndm ndm      4687 Feb 12 13:02 keycert
+drwxr-xr-x. 2 ndm ndm        28 Feb 12 13:29 localbin
+drwxr-xr-x. 2 ndm ndm         6 Feb 12 13:31 ndm_logs
+-rwxr-xr-x. 1 ndm ndm      1380 Feb 12 13:16 netmap.cfg
+-rwxr-xr-x. 1 ndm ndm       310 Feb 12 13:08 options.txt
+-rwxr-xr-x. 1 ndm ndm       310 Feb 12 13:09 options.txt-orig
+-rwxr-xr-x. 1 ndm ndm      1116 Feb 12 13:24 spcust.sh
+-rwxr-xr-x. 1 ndm ndm       605 Feb 12 13:21 userfile.cfg
+
+
+sh cdinstall_a -f options.txt
+
+-Expected output;
+
+Select Statistics Completed Successfully.
+Direct>
+Connect:Direct CLI Terminated...
+20240205 18:09:04     0 CDAI010I verifyInstallation() exited.
+20240205 18:09:04     0 CDAI010I bldXlateTables() entered.
+20240205 18:09:04     0 CDAI010I bldXlateTables() exited. No .sxlt files.
+20240205 18:09:05     0 CDAI010I startInstallAgent() entered.
+20240205 18:09:05     0 CDAI010I startInstallAgent()  installType   .
+20240205 18:09:05     0 CDAI010I startInstallAgent()  agent.enable is y . starting agent...
+20240205 18:09:15     0 CDAI010I startInstallAgent() exited. rc=0
+20240205 18:09:15     0 CDAI001I Connect Direct automated installation completed. install
+20240205 18:09:15     0 CDAI010I createExitStatusFile() entered.
+20240205 18:09:15     0 CDAI010I createExitStatusFile() exited.
+20240205 18:09:15     0 CDAI010I exitScript() entered.
+20240205 18:09:15     0 CDAI010I copyOutputFiles() entered.
+20240205 18:09:15     0 CDAI010I copyOutputFiles() exited. rc=0
+20240205 18:09:15     0 CDAI010I cleanup() entered.
+20240205 18:09:15     0 CDAI010I cleanup() exited.
+20240205 18:09:15     0 CDAI033I cdinstall_a exiting.
+20240205 18:09:15     0 CDAI010I exitScript() exited. finalRc=0
+[root@obf-eastus2-poc-app-vm-01 ndm]#
+
+
+========================
+Error handling for Cert validation failure:
+=========================
+Take the backup of keycert
+update the keycert with new cert
+Update the option.txt file from option.txt-orig 
+update the password   option.txt and spcust.sh is required 
+remove the dir cdunix in /opt/app/ndm
+kill the ndm process if any 
+ps -ef | grep ndm
+
+Change the permission and ownership:
+=========================================
+
+chown -R ndm:ndm /opt/app/ndm
+chmod -R 755 /opt/app/ndm
+run the : sh cdinstall_a -f options.txt
+verify the output from file cdaiLog.txt
+ps -ef | grep ndm
+
+
+
+Direct> Enter a ';' at the end of a command to submit it. Type 'quit;' to exit CLI.
+
+sel stat ccode=(gt,4) startt=(02/15/2024,14:03:18);
+
+Select Statistics Completed Successfully.
+Direct>
+Connect:Direct CLI Terminated...
+20240215 14:03:22     0 CDAI010I verifyInstallation() exited.
+20240215 14:03:22     0 CDAI010I bldXlateTables() entered.
+20240215 14:03:22     0 CDAI010I bldXlateTables() exited. No .sxlt files.
+20240215 14:03:22     0 CDAI010I startInstallAgent() entered.
+20240215 14:03:22     0 CDAI010I startInstallAgent()  installType   .
+20240215 14:03:22     0 CDAI010I startInstallAgent()  agent.enable is y . starting agent...
+20240215 14:03:33     0 CDAI010I startInstallAgent() exited. rc=0
+20240215 14:03:33     0 CDAI001I Connect Direct automated installation completed. install
+20240215 14:03:33     0 CDAI010I createExitStatusFile() entered.
+20240215 14:03:33     0 CDAI010I createExitStatusFile() exited.
+20240215 14:03:33     0 CDAI010I exitScript() entered.
+20240215 14:03:33     0 CDAI010I copyOutputFiles() entered.
+20240215 14:03:33     0 CDAI010I copyOutputFiles() exited. rc=0
+20240215 14:03:33     0 CDAI010I cleanup() entered.
+20240215 14:03:33     0 CDAI010I cleanup() exited.
+20240215 14:03:33     0 CDAI033I cdinstall_a exiting.
+20240215 14:03:33     0 CDAI010I exitScript() exited. finalRc=0
+[root@lnp-eastus2-poc-app-vm-01 ndm]# ps -ef | grep ndm
+root     1147434       1  0 14:03 ?        00:00:00 /opt/app/ndm/cdunix/ndm/bin/cdstatm -i /opt/app/ndm/cdunix/ndm/cfg/lnppoc01/initparm.cfg
+root     1147435       1  0 14:03 ?        00:00:00 /opt/app/ndm/cdunix/ndm/bin/cdpmgr -i /opt/app/ndm/cdunix/ndm/cfg/lnppoc01/initparm.cfg
+root     1147725       1  3 14:03 pts/3    00:00:07 /opt/app/ndm/cdunix/install/agent/jre/bin/java -cp /opt/app/ndm/cdunix/install/agent/bin/install-agent-0.0.153.RELEASE.Agent-1.2.jar:/opt/app/ndm/cdunix/install/agent/bin/lib/*:/opt/app/ndm/cdunix/ndm/bin/SPAdmin.jar -Dlog4j.configurationFile=/opt/app/ndm/cdunix/install/agent/bin/log4j2.xml cd.admincenter.agent.server.App
+root     1147926 1119823  0 14:06 pts/3    00:00:00 grep --color=auto ndm
+[root@lnp-eastus2-poc-app-vm-01 ndm]#
+[root@lnp-eastus2-poc-app-vm-01 ndm]#
+[root@lnp-eastus2-poc-app-vm-01 ndm]#
+[root@lnp-eastus2-poc-app-vm-01 ndm]#
+[root@lnp-eastus2-poc-app-vm-01 ndm]#
+[root@lnp-eastus2-poc-app-vm-01 ndm]#
+[root@lnp-eastus2-poc-app-vm-01 ndm]# sudo su - ndm
+Last login: Thu Feb 15 14:03:22 UTC 2024
+[ndm@lnp-eastus2-poc-app-vm-01 ~]$
+[ndm@lnp-eastus2-poc-app-vm-01 ~]$
+[ndm@lnp-eastus2-poc-app-vm-01 ~]$ cd /opt/app/ndm/cdunix/ndm/bin
+[ndm@lnp-eastus2-poc-app-vm-01 bin]$
+[ndm@lnp-eastus2-poc-app-vm-01 bin]$ ls -lrt
+total 16608
+-rw-r--r--. 1 ndm  ndm   15035 Apr 29  2020 SPCliMessages.properties
+-r-xr-xr-x. 1 ndm  ndm  131005 Apr 29  2020 SPCli.jar
+-r-xr-xr-x. 1 ndm  ndm  313835 Apr 29  2020 SPAdmin.jar
+-r-xr-xr-x. 1 ndm  ndm   27835 Apr 29  2020 lcu.jar
+-rw-r--r--. 1 ndm  ndm    1064 Apr 29  2020 aspera.conf
+-r-xr-xr-x. 1 ndm  ndm  279048 Apr 29  2020 ndmxlt
+-rw-r--r--. 1 ndm  ndm     627 Apr 29  2020 ndmview.awk
+-r-x------. 1 root ndm  145704 Apr 29  2020 ndmumgr
+-rw-r--r--. 1 ndm  ndm   30910 Apr 29  2020 ndmstat.awk
+-r-x------. 1 root ndm 7268016 Apr 29  2020 ndmsmgr
+-rw-r--r--. 1 ndm  ndm    4632 Apr 29  2020 ndmproc.awk
+-r-xr-xr-x. 1 ndm  ndm  240920 Apr 29  2020 ndmmsg
+-r-x------. 1 root ndm 2094536 Apr 29  2020 ndmcmgr
+-rwsr-xr-x. 1 ndm  ndm  681344 Apr 29  2020 ndmauths
+-rwsr-xr-x. 1 ndm  ndm  681344 Apr 29  2020 ndmauthc
+-rwxr-xr-x. 1 ndm  ndm   22200 Apr 29  2020 initcnvt
+-r-xr-xr-x. 1 ndm  ndm  745560 Apr 29  2020 direct
+-rwxr-xr-x. 1 ndm  ndm 1044040 Apr 29  2020 cfgcheck
+-r-x------. 1 root ndm  648904 Apr 29  2020 cdstatm
+-r-xr-xr-x. 1 ndm  ndm  900784 Apr 29  2020 cdsacomp
+-r-sr-x---. 1 root ndm 1627496 Apr 29  2020 cdpmgr
+-r-xr-xr-x. 1 ndm  ndm   10608 Apr 29  2020 cdmsgutil
+-rwxr-xr-x. 1 ndm  ndm    1980 Apr 29  2020 statrestore.sh
+-rwxr-xr-x. 1 ndm  ndm    3067 Apr 29  2020 statarch.sh
+-rwxr-xr-x. 1 ndm  ndm      47 Feb 15 14:02 ndmproc
+-rwxr-xr-x. 1 ndm  ndm      47 Feb 15 14:02 ndmview
+-rwxr-xr-x. 1 ndm  ndm      47 Feb 15 14:02 ndmstat
+-rw-r--r--. 1 ndm  ndm     459 Feb 15 14:02 sample.cd
+-r-xr-xr-x. 1 ndm  ndm      38 Feb 15 14:02 ndmcli
+-r-xr-xr-x. 1 ndm  ndm      38 Feb 15 14:02 ndmpmgr
+-rwxr--r--. 1 ndm  ndm    2463 Feb 15 14:03 spadmin.sh
+-rwxr--r--. 1 ndm  ndm    1579 Feb 15 14:03 lcu.sh
+-rwxr--r--. 1 ndm  ndm    2920 Feb 15 14:03 spcli.sh
+[ndm@lnp-eastus2-poc-app-vm-01 bin]$ ./direct
+
+        **************************************************************
+        *                                                            *
+        *            Licensed Materials - Property of IBM            *
+        *                                                            *
+        *         IBM(R) Connect:Direct(R) for UNIX 6.1.0.0          *
+        *                   Build date: 30Apr2020                    *
+        *                                                            *
+        *  (C) Copyright IBM Corp. 1992, 2018 All Rights Reserved.   *
+        *                                                            *
+        **************************************************************
+
+Enter a ';' at the end of a command to submit it. Type 'quit;' to exit CLI.
+
+Direct> quit;
+
+Connect:Direct CLI Terminated...
+[ndm@lnp-eastus2-poc-app-vm-01 bin]$ ./spcli.sh
+   **************************************************************
+   *               Secure+ Command Line Interface               *
+   *   IBM(R) Connect:Direct(R) Secure Plus v6.1.0.0            *
+   *------------------------------------------------------------*
+   * Licensed Materials - Property of IBM                       *
+   * (C) Copyright IBM Corp. 1999, 2020 All Rights Reserved.    *
+   * US Government Users Restricted Rights - Use, duplication   *
+   * or disclosure restricted by GSA ADP Schedule Contract      *
+   * with IBM Corp.                                             *
+   **************************************************************
+SPCG180W rc=4 Deprecated security settings found, which can expose your node to known vulnerabilities.
+SPCG050I rc=4 Parmfile opened successfully.
+
+SPCLI>
+
+From <https://teams.microsoft.com/multi-window/?agent=electron&version=24010417503> 
+
+
+
+
+To start CD:
+/opt/app/ndm/cdunix/ndm/bin/cdpmgr -i /opt/app/ndm/cdunix/ndm/cfg/$CD_LOCAL_NODE/initparm.cfg
+
+From <https://teams.microsoft.com/v2/> 
+
