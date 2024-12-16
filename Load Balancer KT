@@ -1,0 +1,168 @@
+LB :
+
+VM1 --> PLE  --> xyz.att.com ---DNS mapping PLE 199.179.0.24 == xyz.att.com ( custom domain URL  ) 
+
+LB --> VM1 --> Tomcat(server.xml)/wildfly(standalone.xml)/nginx(nginx.conf/apache-httpd(httpd.conf)  
+
+VM1 : ps -ef | grep tomcat    server.xml     port 8011    xyz.att.com.jks 
+VM1 : ps -ef | grep wildfly   standalone.xml port 8012    xyz.att.com.jks 
+VM1 : ps -ef | grep nginx     nginx.conf     port 8013    xyz.att.com.pem 
+VM1 : ps -ef | grep httpd     httpd.conf     port 8014    xyz.att.com.pem 
+
+VM1 : netstat -tnpl
+
+Listen  8011  /java/tomcat      Backend port   8011
+Listen  8012  /java/wildfly     Backend port   8012
+Listen  8013  /java/nginx       Backend port   8013
+Listen  8014  /java/httpd       Backend port   8014
+
+===============================================================
+
+https//xyz.att.com:Frontend port= 8011  VM1   tomcat    Backend port   8011
+https//xyz.att.com:Frontend port= 8012  VM1   wildfly   Backend port   8012
+https//xyz.att.com:Frontend port= 8013  VM1   nginx     Backend port   8013
+https//xyz.att.com:Frontend port= 8014  VM1   httpd     Backend port   8014
+
+==============================================================
+https//xyz.att.com:8011  VM1
+
+LB : 
+
+Health prob : 8011   --tomcat-lbr 
+
+Conf : --tomcat-lbr 
+
+Pool -> FIP -->  Frontend port   8011            
+Pool -> FIP -->  Backend  port   8011
+Pool -> FIP -->  Health   prob   8011
+
+
+---------
+https//xyz.att.com:8084  VM1  ( https//xyz.att.com:Frontend port ) 
+
+
+LB : 
+
+Health prob : 8011   --tomcat-lbr   Health prob = Backend port  
+
+Conf : --tomcat-lbr 
+
+Pool -> FIP -->  Frontend port   8084            
+Pool -> FIP -->  Backend  port   8011
+Pool -> FIP -->  Health   prob   8011
+
+---------
+https//xyz.att.com:8085  VM1  ( https//xyz.att.com:Frontend port )
+
+LB : 
+
+Health prob : 8011   --tomcat-lbr   Health prob = Backend port  
+
+Conf : --tomcat-lbr 
+
+Pool -> FIP -->  Frontend port   8085            
+Pool -> FIP -->  Backend  port   8011
+Pool -> FIP -->  Health   prob   8011
+ 
+==============================================================================
+Scenario : 1 
+
+VM1 : ps -ef | grep tomcat1  8084  BK-P
+VM1 : ps -ef | grep tomcat2  8085  BK-P
+VM1 : ps -ef | grep tomcat3  8086  BK-P
+VM1 : ps -ef | grep tomcat4  8087  BK-P
+
+https//xyz.att.com:8011 tomcat1  Solved  
+https//xyz.att.com:8012 tomcat2  ??
+https//xyz.att.com:8013 tomcat3  ??
+https//xyz.att.com:8014 tomcat3  ??
+
+https//xyz.att.com:8011 tomcat1   tom-lbr1 
+
+Pool -> FIP -->  Frontend port   ??  8011
+Pool -> FIP -->  Backend  port   ??  8084
+Pool -> FIP -->  Health   prob   ??  8084
+
+https//xyz.att.com:8012 tomcat2  tom-lbr2
+
+Pool -> FIP -->  Frontend port   ??  8012
+Pool -> FIP -->  Backend  port   ??  8085
+Pool -> FIP -->  Health   prob   ??  8085
+
+https//xyz.att.com:8013 tomcat3  tom-lbr3
+
+Pool -> FIP -->  Frontend port   ??  8013
+Pool -> FIP -->  Backend  port   ??  8086
+Pool -> FIP -->  Health   prob   ??  8086
+
+https//xyz.att.com:8014 tomcat4  tom-lbr4
+
+Pool -> FIP -->  Frontend port   ??  8014
+Pool -> FIP -->  Backend  port   ??  8087
+Pool -> FIP -->  Health   prob   ??  8087
+
+
+=============================================================
+
+######################
+Scenario : 2   Not Possible 
+######################
+
+VM1 : ps -ef | grep tomcat1  8084  BK-P  In Use Netstat -tnp 8084/tomcat1 
+VM1 : ps -ef | grep tomcat2  8084  BK-P  Failed -Statup fail 
+VM1 : ps -ef | grep tomcat3  8084  BK-P  Failed -Statup fail 
+VM1 : ps -ef | grep tomcat4  8084  BK-P  Failed -Statup fail 
+
+
+VM1 TOMCAT1  8084   -- Not allowed 
+VM1 TOMCAT2  8084   -- Not allowed 
+VM1 TOMCAT3  8084   -- Not allowed 
+
+=============================================================
+######################
+Scenario : 3
+######################
+
+VM1 : ps -ef | grep tomcat1  8084  BK-P  
+VM2 : ps -ef | grep tomcat1  8084  BK-P
+VM3 : ps -ef | grep tomcat1  8084  BK-P
+VM4 : ps -ef | grep tomcat1  8084  BK-P
+
+https//xyz.att.com:8011 --vm 1
+https//xyz.att.com:8012 --vm 2  
+https//xyz.att.com:8013 --vm 3  
+https//xyz.att.com:8014 --vm 4
+
+Health prob : ??
+
+Conf : --tomcat-lbr 
+
+Pool -> FIP -->  Frontend port   ??            
+Pool -> FIP -->  Backend  port   ??
+Pool -> FIP -->  Health   prob   ??
+
+https//xyz.att.com:8011 tomcat1    tom-lbr1  BLP 1 
+
+Pool -> FIP -->  Frontend port   ??  8011
+Pool -> FIP -->  Backend  port   ??  8084
+Pool -> FIP -->  Health   prob   ??  8084
+
+https//xyz.att.com:8011 tomcat1    tom-lbr1 BLP 2 
+
+Pool -> FIP -->  Frontend port   ??  8011
+Pool -> FIP -->  Backend  port   ??  8084
+Pool -> FIP -->  Health   prob   ??  8084
+
+NAT 
+
+8011 4 8012,8013,2014
+
+10.0.0.1:8011   8084
+10.0.0.2:8012   8084
+10.0.0.3:8013   8084
+10.0.0.4:8014   8084
+
+https//xyz.att.com:8011 --vm 1
+https//xyz.att.com:8012 --vm 2  
+https//xyz.att.com:8013 --vm 3  
+https//xyz.att.com:8014 --vm 4
