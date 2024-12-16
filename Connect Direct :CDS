@@ -1,0 +1,157 @@
+		1. Connect direct must be ndm user sudo su - ndm
+		2. Check if connect direct is running or not
+		3. Ps -ef | grep ndm  ### cdpmgrprocess must be running 
+		4. 
+	 
+		5. Next check if Connect console is up and or running or not 
+		6. Location : /opt/app/ndm/cdunix/ndm/bin>./direct  
+	 ## It can be used to transfer the file 
+	## Check the status if already executed process 
+ 
+
+ 
+Example :  Transfer file CBP to CBP node only ( self-transfer )
+ 
+
+ 
+ 
+Snode = your local node and if you want to tranfer file to destination server then snode will become destination snode name
+ 
+===========================================================
+sub do_copy process snode=exclmnprd01
+step01 copy
+from
+(
+file=/opt/app/ndm/test.txt
+pnode
+)
+to
+(
+file=/opt/app/ndm/received.txt
+snode
+)
+pend;
+=======================================================
+Pnode to snode ( FROM  -->  TO )
+ 
+		7. How to check local snode of the current server 
+ 
+
+ 
+Transfer file CBP to CBP node only ( self-transfer )
+ 
+
+ 
+Process number will be generated 
+ 
+
+ 
+
+ 
+ 
+To check last executed process 
+ 
+Sel stat pnum=7 det;
+ 
+
+Error :
+ 
+
+ 
+So it mean it is not added out netmap.cfg file and search with message id XIPT004I in this example 
+ 
+Commands:
+ 
+ 
+sub do_copy process snode=prmcbpprod01
+step01 copy
+from
+(
+file=/opt/app/ndm/test.txt
+pnode
+)
+to
+(
+file=/opt/app/ndm/received.txt
+snode
+)
+pend;
+ 
+ 
+/opt/app/ndm/cdunix/ndm/bin
+./direct
+sel stat pnum=10 det;
+ 
+ 
+Sync netmap.cfg file :
+sync netmap path=/opt/app/ndm/cdunix/ndm/cfg/prmcbpprod01/netmap.cfg name=*;
+ 
+ 
+----------------------
+ 
+		8. Configuration files:
+ 
+Location 
+ 
+
+ 
+Netmap.cfg file:
+ 
+		1. Whenever we are the sender update the netmap.cfg file
+		2. Whenever we are the receiver then userfile.cfg needs to be updated
+		3. As we have secure + setup then either of the case we have to update netmap.cfg file for both sender and receiver )
+ 
+Let's consider we are the sender then destination snode and FQDN with NVA port  ( NVA port for out bound interfaces 
+Let's consider we are the receiver in the below same example then destination snode and FQDN with 1364 default port 
+ 
+
+ 
+ 
+Whenever we update netmap.cfg file we need to sync the configuration 
+ 
+
+ 
+
+ 
+sync netmap path=/opt/app/ndm/cdunix/ndm/cfg/prmcbpprod01/netmap.cfg name=*;
+ 
+ 
+To check if any remote node if configured or not
+ 
+
+ 
+
+ 
+ 
+ 
+Commands:
+ 
+ 
+sub do_copy process snode=prmcbpprod01
+step01 copy
+from
+(
+file=/opt/app/ndm/test.txt
+pnode
+)
+to
+(
+file=/opt/app/ndm/received.txt
+snode
+)
+pend;
+ 
+ 
+/opt/app/ndm/cdunix/ndm/bin
+./direct
+ 
+sel stat pnum=1 det;
+ 
+/opt/app/ndm/cdunix/ndm/bin
+./spcli.sh
+ 
+ 
+Sync netmap.cfg file :
+sync netmap path=/opt/app/ndm/cdunix/ndm/cfg/obfprod01/netmap.cfg name=*;
+ 
+ /opt/app/ndm/cdunix/ndm/bin/cdpmgr -i /opt/app/ndm/cdunix/ndm/cfg/prmmbpprod02/initparm.cfg
