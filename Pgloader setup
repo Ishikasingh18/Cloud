@@ -1,0 +1,24 @@
+Installing pgloader — pgloader 3.6.9 documentation
+
+https://pgloader.readthedocs.io/en/latest/install.html
+https://github.com/dimitri/pgloader/blob/master/INSTALL.md
+
+
+	1. Install the EPEL repo  Extra Packages for Enterprise Linux (EPEL) Packages :
+	For RHEL 8 :
+
+	subscription-manager repos --enable codeready-builder-for-rhel-8-$(arch)-rpms
+	dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+
+	2. Install rpmbuild dependencies:
+ sudo yum -y install yum-utils rpmdevtools @"Development Tools"
+	
+	3. Install pgloader build dependencies:
+ sudo yum-builddep pgloader.spec
+	
+	4. Download pgloader source:
+ spectool -g -R pgloader.spec
+	
+	5. Build the source and binary RPMs (see rpmbuild --help for other build options):
+ rpmbuild -ba pgloader.spec
+
