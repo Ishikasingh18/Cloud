@@ -1,0 +1,12 @@
+[http]
+    sslVerify = false
+    proxy = http://genproxy.corp.amdocs.com:8080
+[user]
+    name = Ishika Singh
+    email =  ishika18296@gmail.com
+[https]
+    proxy = http://genproxy.corp.amdocs.com:8080
+ 
+
+.gitconfig  ----create a file with this name in any folder where you want to clone the repo from gitlab
+
