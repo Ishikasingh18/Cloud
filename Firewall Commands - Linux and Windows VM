@@ -1,0 +1,16 @@
+#LINUX machine 
+
+systemctl status firewalld
+systemctl stop firewalld
+systemctl disable firewalld
+
+Note : userdata has been updated with firewalld via terraform 
+
+#Windows Machine
+
+1. Check the status of Windows Defender Firewall:
+netsh advfirewall show allprofiles
+
+2. Disable Windows Defender Firewall:
+netsh advfirewall setallprofiles state off
+
