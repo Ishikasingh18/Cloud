@@ -1,0 +1,34 @@
+To install the Oracle Instant Client version `12.2.0.1.0` on a Red Hat Enterprise Linux (RHEL) system, follow these steps:
+### Steps to Install Oracle Instant Client
+1. **Download the Oracle Instant Client**:
+   - Go to the [Oracle Instant Client Downloads page](https://www.oracle.com/database/technologies/instant-client/downloads.html).
+   - Select the appropriate version (e.g., `22010_cl_64`) for Linux x86-64.
+   - Download the required RPM files (e.g., `oracle-instantclient-basic-12.2.0.1.0-1.x86_64.rpm`).
+
+ 
+ 
+2. Copy the downloaded file to EC2 instance by copying it to S3 buckect using below command
+ 
+	aws s3 cp s3://non-dox-db-dump/oracle-instantclient12.2-basic-12.2.0.1.0-1.x86_64.rpm .
+	aws s3 cp s3://non-dox-db-dump/oracle-instantclient12.2-sqlplus-12.2.0.1.0-1.x86_64.rpm .
+	
+3. Now install rpm files along with dependencies
+ 
+sudo yum install libaio
+sudo yum install oracle-instantclient12.2-basic-12.2.0.1.0-1.x86_64.rpm
+sudo yum install oracle-instantclient12.2-sqlplus-12.2.0.1.0-1.x86_64.rpm
+sudo yum install libnsl
+ 
+4. Now locate sqlplus and find path
+ 
+	locate sqlplus
+ 
+5. Now export paths using below command
+ 
+echo 'export LD_LIBRARY_PATH=/usr/lib/oracle/12.2/client64/lib/:$LD_LIBRARY_PATH' >> ~/.bashrc
+echo 'export PATH=/usr/lib/oracle/12.2/client64/bin/:$PATH' >> ~/.bashrc
+source ~/.bashrc
+ 
+6. Varify that sqlplus is installed
+sqlplus -v
+
