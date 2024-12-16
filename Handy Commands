@@ -1,0 +1,69 @@
+# Azure Command to get secret value from keyvault
+
+az login --identify --allow-no-subscriptions -o tsv --only-show-errors
+az keyvault secret show --vault-name <Key vault name> --name <secret name> | /usr/local/bin/jq - r .value
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+#To set sticky bit on all world weritable directories(Linux Commands)
+
+sudo df --local -P | awk {'if (NR!=1) print $6'} | sudo xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \) 2>/dev/null | sudo  xargs chmod a+t 2>/dev/null
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+#To view the certificate - 
+
+keytool -v -list -keystore dashboard-poc.test.att.com.jks  (where the cerificate is in jks format)
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+#To check status of any port
+netstat -tapnl | grep 10080  ---> to check status of any port (running or not) port : 10080 here
+
+--------------------------------------------------------------------------------------------------------------------------------
+#Commands to view connection on port 
+netstat -ano | findstr 8080
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+#To check last login users/entries
+find / -type f -mtime 0 -exec ls {} \;
+
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+#Check the IP address in command prompt
+Nslookup "IP address"
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+#Windows Commands -
+
+$path = "D:\Apache\Tomcat9.0\webapps\sso"
+Get-Process | Where-Object {
+    $_.Modules | Where-Object { $_.FileName -like "$path*" }
+}
+ 
+-----------------------------------------------------------------------------------
+cd C:\Sysinternals
+ 
+------------------------------------------------------------------------------------
+$path = "D:\Apache\Tomcat9.0\webapps\sso"
+Get-Process | ForEach-Object {
+    $process = $_
+    $process.Modules | ForEach-Object {
+        if ($_.FileName -like "$path*") {
+            [PSCustomObject]@{
+                ProcessName = $process.Name
+                ProcessId   = $process.Id
+                Module      = $_.FileName
+            }
+        }
+    }
+}
+
+=================================================================================================
+
+
+
+
+
+
